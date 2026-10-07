@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mini CRM</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f4f6f8;--card:#fff;--ink:#17212b;--mute:#5d6b79;--line:#dde3e9;--brand:#0f4c5c;--brand-ink:#fff;--acc:#e9a23b;--bad:#b3392f;--good:#2c7a4b;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#10171d;--card:#18222b;--ink:#e8edf2;--mute:#92a1b0;--line:#2a3945;--brand:#58b4c8;--brand-ink:#08222a;--acc:#f0b055;--bad:#e8786d;--good:#6cc48c}}
+:root[data-theme="dark"]{--bg:#10171d;--card:#18222b;--ink:#e8edf2;--mute:#92a1b0;--line:#2a3945;--brand:#58b4c8;--brand-ink:#08222a;--acc:#f0b055;--bad:#e8786d;--good:#6cc48c}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "Bricolage Grotesque",system-ui,-apple-system,"Segoe UI",sans-serif}
+.app{display:grid;grid-template-columns:210px 1fr;min-height:100vh}
+nav{background:var(--brand);color:var(--brand-ink);padding:22px 14px;position:sticky;top:0;height:100vh}
+nav h1{font-size:22px;font-weight:800;margin:0 8px 24px;letter-spacing:-.5px}
+nav button{display:block;width:100%;text-align:left;background:none;border:0;color:inherit;font:inherit;padding:10px 12px;border-radius:8px;cursor:pointer;opacity:.8}
+nav button.on{background:rgba(255,255,255,.16);opacity:1;font-weight:600}
+nav button:hover{opacity:1}
+main{padding:28px;max-width:1000px;width:100%}
+h2{font-size:28px;margin:0 0 4px;font-weight:800;letter-spacing:-.5px}
+.sub{color:var(--mute);margin:0 0 22px}
+.bar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+input,select{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:8px;padding:9px 11px;min-width:0}
+input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.bar input{flex:1;min-width:160px}
+.btn{font:inherit;font-weight:600;border:0;border-radius:8px;padding:9px 16px;background:var(--brand);color:var(--brand-ink);cursor:pointer}
+.btn.ghost{background:none;color:var(--ink);border:1px solid var(--line)}
+.btn.sm{padding:4px 10px;font-size:13px}
+.btn.del{color:var(--bad)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:22px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}
+.stat b{display:block;font-size:30px;font-weight:800;letter-spacing:-1px}
+.stat span{color:var(--mute);font-size:13px}
+.stat.hero{background:var(--brand);color:var(--brand-ink);border:0}.stat.hero span{color:inherit;opacity:.8}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:18px}
+.panel h3{margin:0 0 14px;font-size:17px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.pipe{display:grid;grid-template-columns:90px 1fr 70px;gap:10px;align-items:center;margin:9px 0;font-size:14px}
+.track{background:var(--bg);border-radius:6px;height:14px;overflow:hidden}
+.fill{height:100%;background:var(--acc);border-radius:6px;min-width:3px}
+.pipe i{font-style:normal;color:var(--mute);text-align:right}
+.tw{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:12px}
+table{width:100%;border-collapse:collapse;min-width:560px}
+th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:middle}
+th{font-size:13px;color:var(--mute);font-weight:600}
+tr:last-child td{border-bottom:0}
+td.act{text-align:right;white-space:nowrap}
+.tag{display:inline-block;padding:2px 9px;border-radius:99px;font-size:12px;font-weight:600;border:1px solid var(--line)}
+.tag.Active,.tag.Won{color:var(--good);border-color:var(--good)}
+.tag.Inactive,.tag.Lost{color:var(--bad);border-color:var(--bad)}
+.tag.New,.tag.Contacted,.tag.Qualified,.tag.Proposal{color:var(--brand);border-color:var(--brand)}
+.empty{padding:30px;text-align:center;color:var(--mute)}
+dialog{border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink);padding:22px;width:min(420px,92vw)}
+dialog::backdrop{background:rgba(0,0,0,.45)}
+dialog h3{margin:0 0 14px}
+label{display:block;font-size:13px;color:var(--mute);margin-bottom:10px}
+label input,label select{display:block;width:100%;margin-top:3px}
+.dfoot{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
+@media(max-width:720px){
+.app{grid-template-columns:1fr}
+nav{position:sticky;height:auto;display:flex;gap:4px;padding:10px;align-items:center;z-index:2;top:env(safe-area-inset-top,0px)}
+nav h1{margin:0 8px 0 4px;font-size:18px}nav button{width:auto;padding:8px 10px}
+main{padding:18px}.row2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+<nav>
+<h1>Mini CRM</h1>
+<button data-v="dash" class="on">Dashboard</button>
+<button data-v="cust">Customers</button>
+<button data-v="lead">Leads</button>
+</nav>
+<main id="main"></main>
+</div>
+<dialog id="dlg"><form method="dialog" id="frm"></form></dialog>
+
+<script>
+const STAGES=["New","Contacted","Qualified","Proposal","Won","Lost"];
+const money=n=>new Intl.NumberFormat(undefined,{style:"currency",currency:"USD",maximumFractionDigits:0}).format(n||0);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const uid=()=>Math.random().toString(36).slice(2,9);
+const seed={customers:[
+{id:uid(),name:"Priya Nair",company:"Nair Textiles",email:"priya@nairtextiles.example",phone:"+91 98765 43210",status:"Active"},
+{id:uid(),name:"Daniel Okoye",company:"Okoye Logistics",email:"daniel@okoye.example",phone:"+234 801 555 0148",status:"Active"},
+{id:uid(),name:"Sara Lindqvist",company:"Nordlys Studio",email:"sara@nordlys.example",phone:"+46 70 555 01 22",status:"Inactive"}],
+leads:[
+{id:uid(),name:"Arjun Rao",company:"Rao Agro",email:"arjun@raoagro.example",value:12000,stage:"New",source:"Website"},
+{id:uid(),name:"Mei Tan",company:"Tan Robotics",email:"mei@tanrobotics.example",value:48000,stage:"Qualified",source:"Referral"},
+{id:uid(),name:"Lucas Meyer",company:"Meyer GmbH",email:"lucas@meyer.example",value:25000,stage:"Proposal",source:"Event"},
+{id:uid(),name:"Fatima Khan",company:"Khan Foods",email:"fatima@khanfoods.example",value:9000,stage:"Contacted",source:"Cold call"},
+{id:uid(),name:"Omar Haddad",company:"Haddad Build",email:"omar@haddad.example",value:30000,stage:"Won",source:"Referral"}]};
+let db;
+try{db=JSON.parse(localStorage.getItem("minicrm"))}catch(e){}
+if(!db||!db.customers)db=seed;
+const save=()=>{try{localStorage.setItem("minicrm",JSON.stringify(db))}catch(e){}};
+let view="dash",q={cust:"",lead:"",stage:""};
+const $=s=>document.querySelector(s),main=$("#main"),dlg=$("#dlg"),frm=$("#frm");
+
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{view=b.dataset.v;
+document.querySelectorAll("nav button").forEach(x=>x.classList.toggle("on",x===b));render()});
+
+function render(){({dash,cust:customers,lead:leads})[view]()}
+
+function dash(){
+const open=db.leads.filter(l=>!["Won","Lost"].includes(l.stage));
+const won=db.leads.filter(l=>l.stage==="Won");
+const closed=db.leads.filter(l=>["Won","Lost"].includes(l.stage));
+const rate=closed.length?Math.round(won.length/closed.length*100):0;
+const max=Math.max(1,...STAGES.map(s=>db.leads.filter(l=>l.stage===s).length));
+const recent=db.leads.slice(-4).reverse();
+main.innerHTML=`<h2>Dashboard</h2><p class="sub">Where your customers and sales stand today.</p>
+<div class="stats">
+<div class="stat hero"><b>${money(open.reduce((a,l)=>a+ +l.value,0))}</b><span>Open pipeline value</span></div>
+<div class="stat"><b>${db.customers.length}</b><span>Customers (${db.customers.filter(c=>c.status==="Active").length} active)</span></div>
+<div class="stat"><b>${open.length}</b><span>Open leads</span></div>
+<div class="stat"><b>${rate}%</b><span>Win rate (${won.length} won, ${closed.length-won.length} lost)</span></div></div>
+<div class="row2"><div class="panel"><h3>Leads by stage</h3>
+${STAGES.map(s=>{const n=db.leads.filter(l=>l.stage===s).length;return `<div class="pipe"><span>${s}</span><div class="track"><div class="fill" style="width:${n/max*100}%"></div></div><i>${n}</i></div>`}).join("")}</div>
+<div class="panel"><h3>Latest leads</h3>${recent.length?recent.map(l=>`<div class="pipe" style="grid-template-columns:1fr auto"><span>${esc(l.name)}<br><small style="color:var(--mute)">${esc(l.company)}</small></span><span><span class="tag ${l.stage}">${l.stage}</span></span></div>`).join(""):'<div class="empty">No leads yet. Add one in Leads.</div>'}</div></div>`}
+
+function customers(){
+const t=q.cust.toLowerCase();
+const rows=db.customers.filter(c=>(c.name+c.company+c.email).toLowerCase().includes(t));
+main.innerHTML=`<h2>Customers</h2><p class="sub">${db.customers.length} people and companies you work with.</p>
+<div class="bar"><input id="s" type="search" placeholder="Search name, company or email" value="${esc(q.cust)}"><button class="btn" id="add">Add customer</button></div>
+<div class="tw">${rows.length?`<table><tr><th>Name</th><th>Company</th><th>Contact</th><th>Status</th><th></th></tr>
+${rows.map(c=>`<tr><td><b>${esc(c.name)}</b></td><td>${esc(c.company)}</td><td>${esc(c.email)}<br><small style="color:var(--mute)">${esc(c.phone)}</small></td><td><span class="tag ${c.status}">${c.status}</span></td>
+<td class="act"><button class="btn ghost sm" data-e="${c.id}">Edit</button> <button class="btn ghost sm del" data-d="${c.id}">Delete</button></td></tr>`).join("")}</table>`:'<div class="empty">No customers match. Add one or clear the search.</div>'}</div>`;
+const s=$("#s");s.oninput=()=>{q.cust=s.value;customers();const n=$("#s");n.focus();n.setSelectionRange(99,99)};
+$("#add").onclick=()=>custForm();
+main.querySelectorAll("[data-e]").forEach(b=>b.onclick=()=>custForm(db.customers.find(c=>c.id===b.dataset.e)));
+main.querySelectorAll("[data-d]").forEach(b=>b.onclick=()=>{if(confirm("Delete this customer?")){db.customers=db.customers.filter(c=>c.id!==b.dataset.d);save();customers()}})}
+
+function leads(){
+const t=q.lead.toLowerCase();
+const rows=db.leads.filter(l=>(l.name+l.company+l.email).toLowerCase().includes(t)&&(!q.stage||l.stage===q.stage));
+main.innerHTML=`<h2>Leads</h2><p class="sub">${db.leads.length} prospects. Move them through the pipeline, then convert wins to customers.</p>
+<div class="bar"><input id="s" type="search" placeholder="Search leads" value="${esc(q.lead)}">
+<select id="f"><option value="">All stages</option>${STAGES.map(s=>`<option ${q.stage===s?"selected":""}>${s}</option>`).join("")}</select>
+<button class="btn" id="add">Add lead</button></div>
+<div class="tw">${rows.length?`<table><tr><th>Lead</th><th>Value</th><th>Source</th><th>Stage</th><th></th></tr>
+${rows.map(l=>`<tr><td><b>${esc(l.name)}</b><br><small style="color:var(--mute)">${esc(l.company)}</small></td><td>${money(l.value)}</td><td>${esc(l.source)}</td>
+<td><select data-st="${l.id}" aria-label="Stage">${STAGES.map(s=>`<option ${l.stage===s?"selected":""}>${s}</option>`).join("")}</select></td>
+<td class="act">${l.stage==="Won"?`<button class="btn sm" data-c="${l.id}">Convert</button> `:""}<button class="btn ghost sm" data-e="${l.id}">Edit</button> <button class="btn ghost sm del" data-d="${l.id}">Delete</button></td></tr>`).join("")}</table>`:'<div class="empty">No leads match. Add one or change the filter.</div>'}</div>`;
+const s=$("#s");s.oninput=()=>{q.lead=s.value;leads();const n=$("#s");n.focus();n.setSelectionRange(99,99)};
+$("#f").onchange=e=>{q.stage=e.target.value;leads()};
+$("#add").onclick=()=>leadForm();
+main.querySelectorAll("[data-st]").forEach(el=>el.onchange=()=>{db.leads.find(l=>l.id===el.dataset.st).stage=el.value;save();leads()});
+main.querySelectorAll("[data-e]").forEach(b=>b.onclick=()=>leadForm(db.leads.find(l=>l.id===b.dataset.e)));
+main.querySelectorAll("[data-d]").forEach(b=>b.onclick=()=>{if(confirm("Delete this lead?")){db.leads=db.leads.filter(l=>l.id!==b.dataset.d);save();leads()}});
+main.querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>{const l=db.leads.find(x=>x.id===b.dataset.c);
+db.customers.push({id:uid(),name:l.name,company:l.company,email:l.email,phone:"",status:"Active"});
+db.leads=db.leads.filter(x=>x.id!==l.id);save();leads()})}
+
+function fld(n,l,v,type="text",req=false){return `<label>${l}<input name="${n}" type="${type}" value="${esc(v)}" ${req?"required":""}></label>`}
+function opt(n,l,list,v){return `<label>${l}<select name="${n}">${list.map(x=>`<option ${x===v?"selected":""}>${x}</option>`).join("")}</select></label>`}
+function modal(title,body,onSave){
+frm.innerHTML=`<h3>${title}</h3>${body}<div class="dfoot"><button type="button" class="btn ghost" id="x">Cancel</button><button class="btn" value="ok">Save</button></div>`;
+$("#x").onclick=()=>dlg.close();
+frm.onsubmit=e=>{if(!frm.checkValidity())return;onSave(Object.fromEntries(new FormData(frm)));save();render()};
+dlg.showModal()}
+function custForm(c={}){modal(c.id?"Edit customer":"Add customer",
+fld("name","Name",c.name,"text",1)+fld("company","Company",c.company)+fld("email","Email",c.email,"email")+fld("phone","Phone",c.phone,"tel")+opt("status","Status",["Active","Inactive"],c.status),
+d=>{c.id?Object.assign(c,d):db.customers.push({id:uid(),...d})})}
+function leadForm(l={}){modal(l.id?"Edit lead":"Add lead",
+fld("name","Name",l.name,"text",1)+fld("company","Company",l.company)+fld("email","Email",l.email,"email")+fld("value","Deal value (USD)",l.value??"","number")+fld("source","Source",l.source)+opt("stage","Stage",STAGES,l.stage),
+d=>{d.value=+d.value||0;l.id?Object.assign(l,d):db.leads.push({id:uid(),...d})})}
+render();
+</script>
+</body>
+</html>
